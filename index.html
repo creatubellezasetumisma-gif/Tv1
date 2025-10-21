@@ -182,20 +182,49 @@
     © 2025 Gran Rifa Solidaria. Todos los derechos reservados.
   </footer>
 
+  <!-- Firebase App (base SDK) -->
+  <script src="https://www.gstatic.com/firebasejs/9.22.2/firebase-app-compat.js"></script>
+  <!-- Firebase Firestore -->
+  <script src="https://www.gstatic.com/firebasejs/9.22.2/firebase-firestore-compat.js"></script>
+
   <script>
+    // Configura con tus datos reales de Firebase
+    const firebaseConfig = {
+      apiKey: "TU_API_KEY",
+      authDomain: "TU_AUTH_DOMAIN",
+      projectId: "TU_PROJECT_ID",
+      storageBucket: "TU_STORAGE_BUCKET",
+      messagingSenderId: "TU_MESSAGING_SENDER_ID",
+      appId: "TU_APP_ID"
+    };
+
+    // Inicializar Firebase
+    firebase.initializeApp(firebaseConfig);
+    const db = firebase.firestore();
+
     const input = document.getElementById('winnerInput');
     const saveBtn = document.getElementById('saveBtn');
 
-    window.onload = function () {
-      const ganadorGuardado = localStorage.getItem("ganadorRifa");
-      if (ganadorGuardado) {
-        input.value = ganadorGuardado;
+    // Referencia al documento ganador
+    const docRef = db.collection('rifa').doc('ganador');
+
+    // Escuchar cambios en tiempo real
+    docRef.onSnapshot((doc) => {
+      if (doc.exists) {
+        const ganador = doc.data().nombre;
+        input.value = ganador;
         input.disabled = true;
         saveBtn.disabled = true;
         saveBtn.style.opacity = "0.6";
         saveBtn.style.cursor = "not-allowed";
+      } else {
+        input.value = "";
+        input.disabled = false;
+        saveBtn.disabled = false;
+        saveBtn.style.opacity = "1";
+        saveBtn.style.cursor = "pointer";
       }
-    };
+    });
 
     function guardarGanador() {
       const codigo = prompt("🔐 Ingrese el código secreto para guardar el nombre del ganador:");
@@ -210,24 +239,25 @@
         return;
       }
 
-      localStorage.setItem("ganadorRifa", ganador);
-      alert("✅ Ganador guardado: " + ganador);
-      input.disabled = true;
-      saveBtn.disabled = true;
-      saveBtn.style.opacity = "0.6";
-      saveBtn.style.cursor = "not-allowed";
+      docRef.set({ nombre: ganador })
+        .then(() => {
+          alert("✅ Ganador guardado: " + ganador);
+        })
+        .catch((error) => {
+          alert("❌ Error guardando ganador: " + error.message);
+        });
     }
 
     function eliminarGanador() {
       const codigo = prompt("🔐 Ingrese el código secreto para eliminar el nombre del ganador:");
       if (codigo === "1818") {
-        localStorage.removeItem("ganadorRifa");
-        input.value = "";
-        input.disabled = false;
-        saveBtn.disabled = false;
-        saveBtn.style.opacity = "1";
-        saveBtn.style.cursor = "pointer";
-        alert("🗑️ Nombre del ganador eliminado.");
+        docRef.delete()
+          .then(() => {
+            alert("🗑️ Nombre del ganador eliminado.");
+          })
+          .catch((error) => {
+            alert("❌ Error eliminando ganador: " + error.message);
+          });
       } else if (codigo === null) {
         // Cancelado
       } else {
@@ -238,6 +268,5 @@
 
 </body>
 </html>
-
 
 
