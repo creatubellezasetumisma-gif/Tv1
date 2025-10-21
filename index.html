@@ -67,7 +67,7 @@
       transform: scale(1.05);
     }
 
-    .winner-container {
+    .winner-container, .video-container {
       background: rgba(255, 255, 255, 0.95);
       border-radius: 20px;
       padding: 30px 20px;
@@ -76,14 +76,14 @@
       box-shadow: 0 6px 20px rgba(0, 0, 0, 0.1);
     }
 
-    .winner-header {
+    .winner-header, .video-header {
       font-size: 26px;
       font-weight: bold;
       color: #4a148c;
       margin-bottom: 20px;
     }
 
-    .winner-input {
+    .winner-input, .video-input {
       font-size: 22px;
       padding: 12px;
       width: 80%;
@@ -147,11 +147,20 @@
       border-top-right-radius: 20px;
     }
 
+    iframe {
+      margin-top: 20px;
+      width: 100%;
+      max-width: 460px;
+      height: 260px;
+      border-radius: 12px;
+      box-shadow: 0 4px 20px rgba(0,0,0,0.1);
+    }
+
     @media (max-width: 600px) {
       h1 {
         font-size: 36px;
       }
-      .winner-input {
+      .winner-input, .video-input {
         font-size: 20px;
       }
     }
@@ -169,12 +178,23 @@
     <img src="https://novicompu.vtexassets.com/arquivos/ids/173955-800-auto?v=638950178987600000&width=800&height=auto&aspect=true" alt="Televisor Real">
   </div>
 
+  <!-- Contenedor ganador -->
   <div class="winner-container">
     <div class="winner-header">GANADOR DE LA RIFA 🎉</div>
     <input type="text" class="winner-input" id="winnerInput" placeholder="Escribe el nombre del ganador">
     <br>
     <button class="save-button" id="saveBtn" onclick="guardarGanador()">💾 Guardar Ganador</button>
     <button class="delete-button" onclick="eliminarGanador()">🗑️ Eliminar Ganador</button>
+  </div>
+
+  <!-- Nuevo: Contenedor para enlace de video -->
+  <div class="video-container">
+    <div class="video-header">VIDEO DE PRESENTACIÓN 🎬</div>
+    <input type="text" class="video-input" id="videoInput" placeholder="Pega el enlace de YouTube aquí" readonly>
+    <br>
+    <button class="save-button" id="saveVideoBtn" onclick="guardarVideo()">💾 Guardar Video</button>
+    <button class="delete-button" id="deleteVideoBtn" onclick="eliminarVideo()">🗑️ Eliminar Video</button>
+    <div id="videoEmbed"></div>
   </div>
 
   <a href="https://creatubellezasetumisma-gif.github.io/TV/" class="next-page-button">➡️ Ir a la Siguiente Página</a>
@@ -188,7 +208,6 @@
   <script src="https://www.gstatic.com/firebasejs/9.22.1/firebase-database-compat.js"></script>
 
   <script>
-    // Configuración Firebase Realtime Database (usa la que tienes en código 2)
     const firebaseConfig = {
       apiKey: "AIzaSyBOEGr5kiB3ckBEaPVzFevVrGJIojM2c5c",
       authDomain: "rifa-2468e.firebaseapp.com",
@@ -199,18 +218,15 @@
       appId: "1:926316183391:web:77850dea7754ec43ca00ea"
     };
 
-    // Inicializar Firebase
     firebase.initializeApp(firebaseConfig);
     const database = firebase.database();
 
+    // Ganador
     const input = document.getElementById('winnerInput');
     const saveBtn = document.getElementById('saveBtn');
-
-    // Referencia al nodo ganador en la base de datos
     const ganadorRef = database.ref('ganador');
 
-    // Escuchar en tiempo real cambios en el ganador
-    ganadorRef.on('value', (snapshot) => {
+    ganadorRef.on('value', snapshot => {
       const ganador = snapshot.val();
       if (ganador) {
         input.value = ganador;
@@ -233,35 +249,96 @@
         alert("❌ Código incorrecto. No puedes guardar el ganador.");
         return;
       }
-
       const ganador = input.value.trim();
       if (ganador === "") {
         alert("⚠️ El nombre no puede estar vacío.");
         return;
       }
-
       ganadorRef.set(ganador)
-        .then(() => {
-          alert("✅ Ganador guardado: " + ganador);
-        })
-        .catch((error) => {
-          alert("❌ Error guardando ganador: " + error.message);
-        });
+        .then(() => alert("✅ Ganador guardado: " + ganador))
+        .catch(error => alert("❌ Error guardando ganador: " + error.message));
     }
 
     function eliminarGanador() {
       const codigo = prompt("🔐 Ingrese el código secreto para eliminar el nombre del ganador:");
       if (codigo === "1818") {
         ganadorRef.remove()
-          .then(() => {
-            alert("🗑️ Nombre del ganador eliminado.");
-          })
-          .catch((error) => {
-            alert("❌ Error eliminando ganador: " + error.message);
-          });
-      } else if (codigo === null) {
-        // Cancelado, no hacer nada
+          .then(() => alert("🗑️ Nombre del ganador eliminado."))
+          .catch(error => alert("❌ Error eliminando ganador: " + error.message));
+      } else if (codigo !== null) {
+        alert("❌ Código incorrecto. No tienes permiso para eliminar.");
+      }
+    }
+
+    // Video YouTube
+    const videoInput = document.getElementById('videoInput');
+    const saveVideoBtn = document.getElementById('saveVideoBtn');
+    const deleteVideoBtn = document.getElementById('deleteVideoBtn');
+    const videoEmbed = document.getElementById('videoEmbed');
+    const videoRef = database.ref('video');
+
+    function actualizarVideoEmbed(url) {
+      if (!url) {
+        videoEmbed.innerHTML = '';
+        return;
+      }
+      // Extraer ID del video YouTube (de un enlace normal)
+      const videoID = url.match(/(?:https?:\/\/)?(?:www\.)?youtu(?:be\.com\/watch\?v=|\.be\/)([\w\-]+)/);
+      if (videoID && videoID[1]) {
+        const embedUrl = `https://www.youtube.com/embed/${videoID[1]}`;
+        videoEmbed.innerHTML = `<iframe src="${embedUrl}" frameborder="0" allowfullscreen></iframe>`;
       } else {
+        videoEmbed.innerHTML = `<p style="color:#c62828;">⚠️ Enlace inválido de YouTube</p>`;
+      }
+    }
+
+    videoRef.on('value', snapshot => {
+      const videoUrl = snapshot.val();
+      if (videoUrl) {
+        videoInput.value = videoUrl;
+        videoInput.readOnly = true;
+        saveVideoBtn.disabled = true;
+        saveVideoBtn.style.opacity = "0.6";
+        saveVideoBtn.style.cursor = "not-allowed";
+      } else {
+        videoInput.value = "";
+        videoInput.readOnly = false;
+        saveVideoBtn.disabled = false;
+        saveVideoBtn.style.opacity = "1";
+        saveVideoBtn.style.cursor = "pointer";
+      }
+      actualizarVideoEmbed(videoUrl);
+    });
+
+    function guardarVideo() {
+      const codigo = prompt("🔐 Ingrese el código secreto para guardar el enlace del video:");
+      if (codigo !== "1818") {
+        alert("❌ Código incorrecto. No puedes guardar el video.");
+        return;
+      }
+      const url = videoInput.value.trim();
+      if (url === "") {
+        alert("⚠️ El enlace no puede estar vacío.");
+        return;
+      }
+      // Validar URL YouTube simple
+      const youtubeRegex = /^(https?:\/\/)?(www\.)?(youtube\.com\/watch\?v=|youtu\.be\/)[\w\-]+(&.*)?$/;
+      if (!youtubeRegex.test(url)) {
+        alert("❌ Por favor, ingresa un enlace válido de YouTube.");
+        return;
+      }
+      videoRef.set(url)
+        .then(() => alert("✅ Video guardado correctamente."))
+        .catch(error => alert("❌ Error guardando video: " + error.message));
+    }
+
+    function eliminarVideo() {
+      const codigo = prompt("🔐 Ingrese el código secreto para eliminar el enlace del video:");
+      if (codigo === "1818") {
+        videoRef.remove()
+          .then(() => alert("🗑️ Enlace del video eliminado."))
+          .catch(error => alert("❌ Error eliminando video: " + error.message));
+      } else if (codigo !== null) {
         alert("❌ Código incorrecto. No tienes permiso para eliminar.");
       }
     }
@@ -269,3 +346,4 @@
 
 </body>
 </html>
+
