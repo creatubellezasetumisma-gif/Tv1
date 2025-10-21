@@ -22,7 +22,6 @@
       padding-bottom: 60px;
     }
 
-    /* Capa semitransparente para enfocar contenido */
     body::before {
       content: "";
       position: fixed;
@@ -164,13 +163,11 @@
     Sorteo de un <strong>Televisor ENV TECH 32" HD ANDROID 14</strong> por solo $1
   </div>
 
-  <!-- Imágenes -->
   <div class="header-images">
     <img src="https://png.pngtree.com/png-clipart/20250121/original/pngtree-digital-smart-tv-clipart-vector-png-image_19967153.png" alt="Televisor Clipart">
     <img src="https://novicompu.vtexassets.com/arquivos/ids/173955-800-auto?v=638950178987600000&width=800&height=auto&aspect=true" alt="Televisor Real">
   </div>
 
-  <!-- Ganador -->
   <div class="winner-container">
     <div class="winner-header">GANADOR DE LA RIFA 🎉</div>
     <input type="text" class="winner-input" id="winnerInput" placeholder="Escribe el nombre del ganador">
@@ -179,26 +176,50 @@
     <button class="delete-button" onclick="eliminarGanador()">🗑️ Eliminar Ganador</button>
   </div>
 
-  <!-- Botón siguiente página -->
   <a href="https://creatubellezasetumisma-gif.github.io/TV/" class="next-page-button">➡️ Ir a la Siguiente Página</a>
 
   <footer>
     © 2025 Gran Rifa Solidaria. Todos los derechos reservados.
   </footer>
 
+  <!-- Firebase -->
+  <script src="https://www.gstatic.com/firebasejs/9.22.1/firebase-app-compat.js"></script>
+  <script src="https://www.gstatic.com/firebasejs/9.22.1/firebase-database-compat.js"></script>
+
   <script>
     const input = document.getElementById('winnerInput');
     const saveBtn = document.getElementById('saveBtn');
 
+    const firebaseConfig = {
+      apiKey: "AIzaSyBOEGr5kiB3ckBEaPVzFevVrGJIojM2c5c",
+      authDomain: "rifa-2468e.firebaseapp.com",
+      databaseURL: "https://rifa-2468e-default-rtdb.firebaseio.com",
+      projectId: "rifa-2468e",
+      storageBucket: "rifa-2468e.appspot.com",
+      messagingSenderId: "926316183391",
+      appId: "1:926316183391:web:77850dea7754ec43ca00ea"
+    };
+
+    firebase.initializeApp(firebaseConfig);
+    const database = firebase.database();
+    const ganadorRef = database.ref('ganador');
+
     window.onload = function () {
-      const ganadorGuardado = localStorage.getItem("ganadorRifa");
-      if (ganadorGuardado) {
-        input.value = ganadorGuardado;
-        input.disabled = true;
-        saveBtn.disabled = true;
-        saveBtn.style.opacity = "0.6";
-        saveBtn.style.cursor = "not-allowed";
-      }
+      ganadorRef.on('value', snapshot => {
+        const ganador = snapshot.val();
+        if (ganador) {
+          input.value = ganador;
+          input.disabled = true;
+          saveBtn.disabled = true;
+          saveBtn.style.opacity = "0.6";
+          saveBtn.style.cursor = "not-allowed";
+        } else {
+          input.disabled = false;
+          saveBtn.disabled = false;
+          saveBtn.style.opacity = "1";
+          saveBtn.style.cursor = "pointer";
+        }
+      });
     };
 
     function guardarGanador() {
@@ -208,24 +229,26 @@
         return;
       }
 
-      localStorage.setItem("ganadorRifa", ganador);
-      alert("✅ Ganador guardado: " + ganador);
-      input.disabled = true;
-      saveBtn.disabled = true;
-      saveBtn.style.opacity = "0.6";
-      saveBtn.style.cursor = "not-allowed";
+      ganadorRef.set(ganador, error => {
+        if (error) {
+          alert("❌ Error al guardar el nombre.");
+        } else {
+          alert("✅ Ganador guardado: " + ganador);
+        }
+      });
     }
 
     function eliminarGanador() {
       const codigo = prompt("🔐 Ingrese el código secreto para eliminar el nombre del ganador:");
       if (codigo === "1818") {
-        localStorage.removeItem("ganadorRifa");
-        input.value = "";
-        input.disabled = false;
-        saveBtn.disabled = false;
-        saveBtn.style.opacity = "1";
-        saveBtn.style.cursor = "pointer";
-        alert("🗑️ Nombre del ganador eliminado.");
+        ganadorRef.remove().then(() => {
+          input.value = "";
+          input.disabled = false;
+          saveBtn.disabled = false;
+          saveBtn.style.opacity = "1";
+          saveBtn.style.cursor = "pointer";
+          alert("🗑️ Nombre del ganador eliminado.");
+        });
       } else if (codigo === null) {
         // Cancelado
       } else {
@@ -236,4 +259,5 @@
 
 </body>
 </html>
+
 
