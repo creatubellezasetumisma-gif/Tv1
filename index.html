@@ -1,0 +1,238 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <title>🎉 Gran Rifa Solidaria</title>
+  <style>
+    * {
+      box-sizing: border-box;
+      margin: 0;
+      padding: 0;
+    }
+
+    body {
+      font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+      background: url('https://www.transparenttextures.com/patterns/symphony.png'), linear-gradient(to right, #fceabb, #f8b500);
+      background-size: cover;
+      background-attachment: fixed;
+      color: #333;
+      text-align: center;
+      position: relative;
+      padding-bottom: 60px;
+    }
+
+    /* Capa semitransparente para enfocar contenido */
+    body::before {
+      content: "";
+      position: fixed;
+      top: 0; left: 0;
+      width: 100%; height: 100%;
+      background: rgba(255, 255, 255, 0.7);
+      backdrop-filter: blur(3px);
+      z-index: -1;
+    }
+
+    h1 {
+      font-size: 48px;
+      margin-top: 30px;
+      color: #d81b60;
+      text-shadow: 2px 2px 6px rgba(0, 0, 0, 0.1);
+    }
+
+    .header-text {
+      font-size: 22px;
+      font-weight: 600;
+      margin: 10px 20px 30px;
+      color: #333;
+    }
+
+    .header-images {
+      display: flex;
+      flex-wrap: wrap;
+      justify-content: center;
+      gap: 20px;
+      margin-bottom: 40px;
+    }
+
+    .header-images img {
+      max-width: 300px;
+      width: 100%;
+      border-radius: 15px;
+      box-shadow: 0 8px 25px rgba(0, 0, 0, 0.15);
+      transition: transform 0.3s;
+    }
+
+    .header-images img:hover {
+      transform: scale(1.05);
+    }
+
+    .winner-container {
+      background: rgba(255, 255, 255, 0.95);
+      border-radius: 20px;
+      padding: 30px 20px;
+      margin: 30px auto;
+      max-width: 500px;
+      box-shadow: 0 6px 20px rgba(0, 0, 0, 0.1);
+    }
+
+    .winner-header {
+      font-size: 26px;
+      font-weight: bold;
+      color: #4a148c;
+      margin-bottom: 20px;
+    }
+
+    .winner-input {
+      font-size: 22px;
+      padding: 12px;
+      width: 80%;
+      max-width: 400px;
+      border-radius: 12px;
+      border: 2px solid #ccc;
+      text-align: center;
+      margin-bottom: 20px;
+    }
+
+    button {
+      padding: 12px 25px;
+      border: none;
+      border-radius: 30px;
+      font-size: 16px;
+      font-weight: bold;
+      margin: 10px 5px;
+      cursor: pointer;
+      transition: all 0.3s ease;
+    }
+
+    .save-button {
+      background-color: #2e7d32;
+      color: white;
+    }
+
+    .delete-button {
+      background-color: #c62828;
+      color: white;
+    }
+
+    button:hover {
+      transform: scale(1.05);
+      box-shadow: 0 5px 15px rgba(0,0,0,0.2);
+    }
+
+    .next-page-button {
+      display: inline-block;
+      margin: 40px auto;
+      background: linear-gradient(to right, #2196f3, #21cbf3);
+      color: white;
+      padding: 15px 40px;
+      font-size: 18px;
+      border-radius: 35px;
+      text-decoration: none;
+      transition: all 0.3s ease;
+    }
+
+    .next-page-button:hover {
+      transform: scale(1.05);
+      box-shadow: 0 5px 15px rgba(0,0,0,0.3);
+    }
+
+    footer {
+      margin-top: 60px;
+      padding: 20px;
+      background-color: #f06292;
+      color: white;
+      font-size: 14px;
+      border-top-left-radius: 20px;
+      border-top-right-radius: 20px;
+    }
+
+    @media (max-width: 600px) {
+      h1 {
+        font-size: 36px;
+      }
+      .winner-input {
+        font-size: 20px;
+      }
+    }
+  </style>
+</head>
+<body>
+
+  <h1>🎁 GRAN RIFA SOLIDARIA 🎁</h1>
+  <div class="header-text">
+    Sorteo de un <strong>Televisor ENV TECH 32" HD ANDROID 14</strong> por solo $1
+  </div>
+
+  <!-- Imágenes -->
+  <div class="header-images">
+    <img src="https://png.pngtree.com/png-clipart/20250121/original/pngtree-digital-smart-tv-clipart-vector-png-image_19967153.png" alt="Televisor Clipart">
+    <img src="https://novicompu.vtexassets.com/arquivos/ids/173955-800-auto?v=638950178987600000&width=800&height=auto&aspect=true" alt="Televisor Real">
+  </div>
+
+  <!-- Ganador -->
+  <div class="winner-container">
+    <div class="winner-header">GANADOR DE LA RIFA 🎉</div>
+    <input type="text" class="winner-input" id="winnerInput" placeholder="Escribe el nombre del ganador">
+    <br>
+    <button class="save-button" id="saveBtn" onclick="guardarGanador()">💾 Guardar Ganador</button>
+    <button class="delete-button" onclick="eliminarGanador()">🗑️ Eliminar Ganador</button>
+  </div>
+
+  <!-- Botón siguiente página -->
+  <a href="https://creatubellezasetumisma-gif.github.io/TV/" class="next-page-button">➡️ Ir a la Siguiente Página</a>
+
+  <footer>
+    © 2025 Gran Rifa Solidaria. Todos los derechos reservados.
+  </footer>
+
+  <script>
+    const input = document.getElementById('winnerInput');
+    const saveBtn = document.getElementById('saveBtn');
+
+    window.onload = function () {
+      const ganadorGuardado = localStorage.getItem("ganadorRifa");
+      if (ganadorGuardado) {
+        input.value = ganadorGuardado;
+        input.disabled = true;
+        saveBtn.disabled = true;
+        saveBtn.style.opacity = "0.6";
+        saveBtn.style.cursor = "not-allowed";
+      }
+    };
+
+    function guardarGanador() {
+      const ganador = input.value.trim();
+      if (ganador === "") {
+        alert("⚠️ El nombre no puede estar vacío.");
+        return;
+      }
+
+      localStorage.setItem("ganadorRifa", ganador);
+      alert("✅ Ganador guardado: " + ganador);
+      input.disabled = true;
+      saveBtn.disabled = true;
+      saveBtn.style.opacity = "0.6";
+      saveBtn.style.cursor = "not-allowed";
+    }
+
+    function eliminarGanador() {
+      const codigo = prompt("🔐 Ingrese el código secreto para eliminar el nombre del ganador:");
+      if (codigo === "1818") {
+        localStorage.removeItem("ganadorRifa");
+        input.value = "";
+        input.disabled = false;
+        saveBtn.disabled = false;
+        saveBtn.style.opacity = "1";
+        saveBtn.style.cursor = "pointer";
+        alert("🗑️ Nombre del ganador eliminado.");
+      } else if (codigo === null) {
+        // Cancelado
+      } else {
+        alert("❌ Código incorrecto. No tienes permiso para eliminar.");
+      }
+    }
+  </script>
+
+</body>
+</html>
