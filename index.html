@@ -5,6 +5,7 @@
   <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
   <title>🎉 Gran Rifa Solidaria</title>
   <style>
+    /* Tus estilos originales sin cambios */
     * {
       box-sizing: border-box;
       margin: 0;
@@ -182,36 +183,36 @@
     © 2025 Gran Rifa Solidaria. Todos los derechos reservados.
   </footer>
 
-  <!-- Firebase App (base SDK) -->
-  <script src="https://www.gstatic.com/firebasejs/9.22.2/firebase-app-compat.js"></script>
-  <!-- Firebase Firestore -->
-  <script src="https://www.gstatic.com/firebasejs/9.22.2/firebase-firestore-compat.js"></script>
+  <!-- Firebase SDK Realtime Database -->
+  <script src="https://www.gstatic.com/firebasejs/9.22.1/firebase-app-compat.js"></script>
+  <script src="https://www.gstatic.com/firebasejs/9.22.1/firebase-database-compat.js"></script>
 
   <script>
-    // Configura con tus datos reales de Firebase
+    // Configuración Firebase Realtime Database (usa la que tienes en código 2)
     const firebaseConfig = {
-      apiKey: "TU_API_KEY",
-      authDomain: "TU_AUTH_DOMAIN",
-      projectId: "TU_PROJECT_ID",
-      storageBucket: "TU_STORAGE_BUCKET",
-      messagingSenderId: "TU_MESSAGING_SENDER_ID",
-      appId: "TU_APP_ID"
+      apiKey: "AIzaSyBOEGr5kiB3ckBEaPVzFevVrGJIojM2c5c",
+      authDomain: "rifa-2468e.firebaseapp.com",
+      databaseURL: "https://rifa-2468e-default-rtdb.firebaseio.com",
+      projectId: "rifa-2468e",
+      storageBucket: "rifa-2468e.appspot.com",
+      messagingSenderId: "926316183391",
+      appId: "1:926316183391:web:77850dea7754ec43ca00ea"
     };
 
     // Inicializar Firebase
     firebase.initializeApp(firebaseConfig);
-    const db = firebase.firestore();
+    const database = firebase.database();
 
     const input = document.getElementById('winnerInput');
     const saveBtn = document.getElementById('saveBtn');
 
-    // Referencia al documento ganador
-    const docRef = db.collection('rifa').doc('ganador');
+    // Referencia al nodo ganador en la base de datos
+    const ganadorRef = database.ref('ganador');
 
-    // Escuchar cambios en tiempo real
-    docRef.onSnapshot((doc) => {
-      if (doc.exists) {
-        const ganador = doc.data().nombre;
+    // Escuchar en tiempo real cambios en el ganador
+    ganadorRef.on('value', (snapshot) => {
+      const ganador = snapshot.val();
+      if (ganador) {
         input.value = ganador;
         input.disabled = true;
         saveBtn.disabled = true;
@@ -239,7 +240,7 @@
         return;
       }
 
-      docRef.set({ nombre: ganador })
+      ganadorRef.set(ganador)
         .then(() => {
           alert("✅ Ganador guardado: " + ganador);
         })
@@ -251,7 +252,7 @@
     function eliminarGanador() {
       const codigo = prompt("🔐 Ingrese el código secreto para eliminar el nombre del ganador:");
       if (codigo === "1818") {
-        docRef.delete()
+        ganadorRef.remove()
           .then(() => {
             alert("🗑️ Nombre del ganador eliminado.");
           })
@@ -259,7 +260,7 @@
             alert("❌ Error eliminando ganador: " + error.message);
           });
       } else if (codigo === null) {
-        // Cancelado
+        // Cancelado, no hacer nada
       } else {
         alert("❌ Código incorrecto. No tienes permiso para eliminar.");
       }
@@ -268,5 +269,3 @@
 
 </body>
 </html>
-
-
